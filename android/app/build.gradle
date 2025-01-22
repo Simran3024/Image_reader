@@ -1,0 +1,47 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin" // Flutter plugin for Gradle
+}
+
+android {
+    namespace "com.example.showpdf"
+    ndkVersion "25.1.8937393"
+    buildToolsVersion "34.0.0" // Latest available build tools
+    compileSdkVersion 34 // Latest stable version
+
+    defaultConfig {
+        applicationId "com.example.showpdf"
+        minSdkVersion 23
+        targetSdkVersion 34
+        versionCode flutter.versionCode ?: 1 // Provide fallback value
+        versionName flutter.versionName ?: "1.0" // Provide fallback value
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug // Signing with debug keys for now
+        }
+    }
+}
+
+flutter {
+    source = "../.." // Flutter project root
+}
+
+dependencies {
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0' // For HTTP requests
+    implementation 'com.google.code.gson:gson:2.10.1'   // For JSON parsing
+}
+
+// Apply the Google Services plugin at the end of the file
+apply plugin: 'com.google.gms.google-services'

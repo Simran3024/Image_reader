@@ -1,0 +1,28 @@
+buildscript {
+    repositories {
+        google()          // Required for Android build tools
+        mavenCentral()    // Central repository for libraries
+    }
+
+    dependencies {
+        // Gradle Plugin for building the app
+        classpath 'com.google.gms:google-services:4.4.2'  // Check for latest version
+        classpath 'com.android.tools.build:gradle:8.2.1'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()    // Ensure mavenCentral is present for libraries like 'httpclient'
+    }
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
