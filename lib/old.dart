@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Import FirebaseAuth
-import 'login_page.dart';
 
 class ShowingImagePage extends StatelessWidget {
-  final String imageUrl =
-      "https://res.cloudinary.com/dlmq3cle6/image/upload/v1737525186/cpglvz7w16haxvnwcjwy.jpg"; // Cloudinary Image URL
+  final List<String> imageUrls = [
+    "https://res.cloudinary.com/dlmq3cle6/image/upload/v1737561216/241218_-_250108_Das_Angebot-2_vkxk8j.png",
+    "https://res.cloudinary.com/dlmq3cle6/image/upload/v1737561209/241218_-_250108_Das_Angebot-3_lyknkx.png",
+    "https://res.cloudinary.com/dlmq3cle6/image/upload/v1737561196/241218_-_250108_Das_Angebot-1_uzmjxz.png",
+    "https://res.cloudinary.com/dlmq3cle6/image/upload/v1737561191/241218_-_250108_Das_Angebot-4_c6oifc.png",
+  ];
 
   // Function to log out the user
   Future<void> _logout(BuildContext context) async {
     try {
       await FirebaseAuth.instance.signOut(); // Sign out user
-      // After logging out, navigate to Login page
       Navigator.pushReplacementNamed(context, '/login_page');
     } catch (e) {
       ScaffoldMessenger.of(context)
@@ -33,23 +35,30 @@ class ShowingImagePage extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding:
-            const EdgeInsets.symmetric(vertical: 16.0), // Add vertical margin
-        child: CachedNetworkImage(
-          imageUrl: imageUrl,
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-          placeholder: (context, url) =>
-              const Center(child: CircularProgressIndicator()),
-          errorWidget: (context, url, error) =>
-              const Center(child: Text("Failed to load image")),
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: ListView.builder(
+          itemCount: imageUrls.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: CachedNetworkImage(
+                imageUrl: imageUrls[index],
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: 300, // Set height for better visibility
+                placeholder: (context, url) =>
+                    const Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) =>
+                    const Center(child: Text("Failed to load image")),
+              ),
+            );
+          },
         ),
       ),
       bottomNavigationBar: BottomAppBar(
         color: Colors.transparent,
         child: Padding(
-          padding: const EdgeInsets.all(8.0), // Add some padding to the button
+          padding: const EdgeInsets.all(8.0),
           child: IconButton(
             icon:
                 Icon(Icons.account_circle, size: 40, color: Colors.green[800]),
