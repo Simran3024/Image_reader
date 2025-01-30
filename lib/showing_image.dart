@@ -75,7 +75,7 @@ class _ShowingImagePageState extends State<ShowingImagePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.green[50],
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
