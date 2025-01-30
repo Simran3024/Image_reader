@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>848924146996-1ed8bs7kct335j5koj8l4jmvck42r039.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.848924146996-1ed8bs7kct335j5koj8l4jmvck42r039</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>848924146996-ch7b64o5o40c0aeccsgqj7lvc3p94gg5.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDL1Ra5-wUwhc6nXHe-KN8UOFkncyWxz10</string>
+	<key>GCM_SENDER_ID</key>
+	<string>848924146996</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.showpdf</string>
+	<key>PROJECT_ID</key>
+	<string>pdf-reader-4f052</string>
+	<key>STORAGE_BUCKET</key>
+	<string>pdf-reader-4f052.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:848924146996:ios:63d9d6b3f08b173cb37961</string>
+</dict>
+</plist>
