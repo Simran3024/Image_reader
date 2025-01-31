@@ -30,7 +30,38 @@ class AuthCheck extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
+          return Scaffold(
+            backgroundColor: Colors.green, // Green background
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Peasant B', // Heading text
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Welcome! Don\'t Miss Out on Today\'s Special Discount – Just for You!',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 20),
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          );
         }
         if (snapshot.hasData) {
           return ShowingImagePage(); // If logged in, navigate to ShowingImagePage
@@ -82,104 +113,6 @@ class AuthCheck extends StatelessWidget {
 //         }
 //         return LoginPage(); // Navigate to LoginPage if not logged in
 //       },
-//     );
-//   }
-// }
-
-
-// FCM Token: crVW7K8GRLGoifMC-C8z5A:APA91bEzv0d3sCxsM6hURvzNoMcaoxw2A0fFxB7kBUigfvhxZzM7sgOMfZw1al3w7pI_GWC74r3iAh4Gl7nGXnGLp8aKRgMkdUSbVuGGcvWKpjKP4S-X8EU
-
-// import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_messaging/firebase_messaging.dart';
-// import 'package:flutter/material.dart';
-
-// void main() async {
-//   WidgetsFlutterBinding.ensureInitialized();
-//   await Firebase.initializeApp(); // Initialize Firebase
-//   FirebaseMessaging.onBackgroundMessage(
-//       _firebaseMessagingBackgroundHandler); // Handle background messages
-//   runApp(MyApp());
-// }
-
-// // Background message handler
-// Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-//   await Firebase.initializeApp();
-//   print("Handling a background message: ${message.messageId}");
-// }
-
-// class MyApp extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       debugShowCheckedModeBanner: false,
-//       home: HomePage(),
-//     );
-//   }
-// }
-
-// class HomePage extends StatefulWidget {
-//   @override
-//   _HomePageState createState() => _HomePageState();
-// }
-
-// class _HomePageState extends State<HomePage> {
-//   String? _fcmToken;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     _initFirebaseMessaging();
-//   }
-
-//   void _initFirebaseMessaging() async {
-//     // Request notification permissions (necessary for iOS)
-//     NotificationSettings settings =
-//         await FirebaseMessaging.instance.requestPermission(
-//       alert: true,
-//       badge: true,
-//       sound: true,
-//     );
-
-//     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-//       print("User granted permission for notifications");
-//     } else {
-//       print("User denied notification permissions");
-//       return;
-//     }
-
-//     // Get FCM token
-//     String? token = await FirebaseMessaging.instance.getToken();
-//     if (token != null) {
-//       setState(() {
-//         _fcmToken = token;
-//       });
-//       print("FCM Token: $token");
-//       // You can send this token to your server for further usage
-//     }
-
-//     // Listen for foreground messages
-//     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-//       print("Received a foreground message: ${message.notification?.title}");
-//     });
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text("FCM Token Generator"),
-//       ),
-//       body: Center(
-//         child: _fcmToken == null
-//             ? CircularProgressIndicator()
-//             : Padding(
-//                 padding: const EdgeInsets.all(16.0),
-//                 child: Text(
-//                   "FCM Token:\n\n$_fcmToken",
-//                   textAlign: TextAlign.center,
-//                 ),
-//               ),
-//       ),
 //     );
 //   }
 // }
