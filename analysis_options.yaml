@@ -10,6 +10,10 @@
 include: package:flutter_lints/flutter.yaml
 
 linter:
+  rules:
+    # Uncomment to disable or enable specific lint rules
+    # avoid_print: false
+    # prefer_single_quotes: true
   # The lint rules applied to this project can be customized in the
   # section below to disable rules from the `package:flutter_lints/flutter.yaml`
   # included above or to enable additional rules. A list of all available lints
