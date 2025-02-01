@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'login_page.dart'; // Import your login page
-import 'showing_image.dart'; // Import your showing image page
+import 'login_page.dart';
+import 'showing_image.dart'; // Ensure this import is correct
+import 'contact_info.dart'; // Ensure this import is correct
+import 'profile.dart'; // Ensure this import is correct
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,9 +17,25 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'PDF Viewer App',
+      theme: ThemeData(primarySwatch: Colors.green),
+      initialRoute: '/',
       routes: {
         '/': (context) => AuthCheck(),
         '/login_page': (context) => LoginPage(),
+        '/showing_image': (context) => ShowingImagePage(), // Add this route
+        '/contact_info': (context) => ContactInfoPage(),
+        '/profile': (context) => ProfilePage(),
+      },
+      // Optional: Handle unknown routes
+      onUnknownRoute: (settings) {
+        return MaterialPageRoute(
+          builder: (context) => Scaffold(
+            body: Center(
+              child: Text('No route defined for ${settings.name}'),
+            ),
+          ),
+        );
       },
     );
   }
@@ -64,14 +82,15 @@ class AuthCheck extends StatelessWidget {
           );
         }
         if (snapshot.hasData) {
-          return ShowingImagePage(); // If logged in, navigate to ShowingImagePage
+          // If logged in, navigate to ShowingImagePage
+          return ShowingImagePage();
         }
-        return LoginPage(); // If not logged in, navigate to LoginPage
+        // If not logged in, navigate to LoginPage
+        return LoginPage();
       },
     );
   }
 }
-
 // import 'package:firebase_core/firebase_core.dart';
 // import 'package:flutter/material.dart';
 // import 'login_page.dart'; // Import your login page
