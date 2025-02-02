@@ -1,5 +1,15 @@
-package com.example.showpdf
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 
-import io.flutter.embedding.android.FlutterActivity
+class MainActivity: FlutterActivity() {
+    override fun onCreate(savedInstanceState: android.os.Bundle?) {
+        super.onCreate(savedInstanceState)
 
-class MainActivity: FlutterActivity()
+        // Initialize Firebase
+        FirebaseApp.initializeApp(this)
+
+        // Use Debug Provider for development
+        FirebaseAppCheck.getInstance().installAppCheckProviderFactory(
+            DebugAppCheckProviderFactory.getInstance()
+        )
+    }
+}

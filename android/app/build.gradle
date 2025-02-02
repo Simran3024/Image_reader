@@ -43,8 +43,10 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.11.0' // For HTTP requests
     implementation 'com.google.code.gson:gson:2.10.1'   // For JSON parsing
     implementation 'com.google.firebase:firebase-messaging:23.1.2' // Firebase Messaging
+    // implementation("com.google.firebase:firebase-appcheck-playintegrity")
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.3' // Add core library desugaring dependency
 }
+
 
 // Apply the Google Services plugin at the end of the file
 apply plugin: 'com.google.gms.google-services'
