@@ -9,27 +9,6 @@ import 'login_page.dart'; // Import the login page
 import 'contact_info.dart';
 import 'profile.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'PDF Viewer',
-      home: ShowingImagePage(),
-      routes: {
-        '/contact_info': (context) =>
-            ContactInfoPage(), // Assuming this page exists
-        '/profile': (context) => ProfilePage(), // Assuming this page exists
-      },
-    );
-  }
-}
-
 class ShowingImagePage extends StatefulWidget {
   @override
   _ShowingImagePageState createState() => _ShowingImagePageState();
@@ -154,7 +133,8 @@ class _ShowingImagePageState extends State<ShowingImagePage> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.person, color: Colors.black, size: 30),
+            icon:
+                Icon(Icons.account_circle, color: Colors.green[800], size: 30),
             onPressed: _showLogoutDialog, // Show logout popup
           ),
         ],
