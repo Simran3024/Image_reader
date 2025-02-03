@@ -1,10 +1,34 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_pdfview/flutter_pdfview.dart'; // Add flutter_pdfview package
 import 'package:http/http.dart' as http;
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'login_page.dart'; // Import the login page
+import 'contact_info.dart';
+import 'profile.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'PDF Viewer',
+      home: ShowingImagePage(),
+      routes: {
+        '/contact_info': (context) =>
+            ContactInfoPage(), // Assuming this page exists
+        '/profile': (context) => ProfilePage(), // Assuming this page exists
+      },
+    );
+  }
+}
 
 class ShowingImagePage extends StatefulWidget {
   @override
@@ -12,54 +36,103 @@ class ShowingImagePage extends StatefulWidget {
 }
 
 class _ShowingImagePageState extends State<ShowingImagePage> {
-  List<File> pdfFiles = [];
+  List<String> pdfUrls = []; // Store PDF URLs
   bool isLoading = true;
-  int _selectedIndex = 0;
+  String? selectedPdfUrl; // Store the local file path of the selected PDF
+  int _selectedIndex = 0; // Track selected index for BottomNavigationBar
 
   @override
   void initState() {
     super.initState();
-    fetchPdfsOnly();
+    fetchPdfUrls(); // Fetch URLs when the page loads
   }
 
-  Future<void> fetchPdfsOnly() async {
-    try {
-      final pdfRefs = await FirebaseStorage.instance.ref('pdf/').listAll();
-      final pdfUrls =
-          await Future.wait(pdfRefs.items.map((ref) => ref.getDownloadURL()));
+  // Fetch all PDF URLs from Firebase Realtime Database
+  void fetchPdfUrls() async {
+    final ref = FirebaseDatabase.instance.ref().child('pdfs');
+    final snapshot = await ref.get(); // Get all items from the 'pdfs' node
 
-      final downloadedPdfs =
-          await Future.wait(pdfUrls.map((url) => _downloadOrGetCachedPdf(url)));
+    if (snapshot.exists) {
+      final data = snapshot.value as Map<dynamic, dynamic>;
+      List<String> urls = [];
 
-      if (mounted) {
+      // Extract the 'url' field for each item
+      data.forEach((key, value) {
+        if (value['url'] != null) {
+          urls.add(value['url']);
+        }
+      });
+
+      if (urls.isNotEmpty) {
+        // Automatically download and display the first PDF
+        String firstPdfPath = await downloadPdf(urls.first);
         setState(() {
-          pdfFiles = downloadedPdfs.whereType<File>().toList();
+          pdfUrls = urls;
+          selectedPdfUrl = firstPdfPath;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
           isLoading = false;
         });
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to fetch PDFs')),
-      );
-      if (mounted) setState(() => isLoading = false);
+    } else {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
-  Future<File?> _downloadOrGetCachedPdf(String url) async {
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final fileName = Uri.parse(url).pathSegments.last;
-      final file = File('${dir.path}/$fileName');
+  // Function to download the PDF from URL and return the local file path
+  Future<String> downloadPdf(String url) async {
+    final response = await http.get(Uri.parse(url));
+    final bytes = response.bodyBytes;
+    final tempDir = await getTemporaryDirectory();
+    final filePath =
+        '${tempDir.path}/pdf_${DateTime.now().millisecondsSinceEpoch}.pdf';
+    final file = File(filePath);
+    await file.writeAsBytes(bytes);
+    return filePath;
+  }
 
-      if (await file.exists()) {
-        return file;
-      }
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Logout'),
+        content: Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context), // Close dialog
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginPage()),
+              );
+            },
+            child: Text('Logout', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 
-      final response = await http.get(Uri.parse(url));
-      await file.writeAsBytes(response.bodyBytes);
-      return file;
-    } catch (e) {
-      return null;
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 1:
+        Navigator.pushNamed(context, '/contact_info');
+        break;
+      case 2:
+        Navigator.pushNamed(context, '/profile');
+        break;
     }
   }
 
@@ -79,37 +152,25 @@ class _ShowingImagePageState extends State<ShowingImagePage> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.person, color: Colors.black, size: 30),
+            onPressed: _showLogoutDialog, // Show logout popup
+          ),
+        ],
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : pdfFiles.isEmpty
-              ? Center(
-                  child:
-                      Text("No PDFs available", style: TextStyle(fontSize: 18)))
-              : ListView.builder(
-                  physics:
-                      BouncingScrollPhysics(), // Smooth scrolling for the entire list
-                  padding: EdgeInsets.all(10),
-                  itemCount: pdfFiles.length,
-                  itemBuilder: (context, index) {
-                    return PDFViewerWidget(pdfFile: pdfFiles[index]);
-                  },
-                ),
+          ? Center(
+              child:
+                  CircularProgressIndicator()) // Show loading spinner while fetching
+          : selectedPdfUrl != null
+              ? PDFView(
+                  filePath: selectedPdfUrl) // Display the first available PDF
+              : Center(
+                  child: Text('No PDFs available')), // Show message if no PDFs
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-          switch (index) {
-            case 1:
-              Navigator.pushNamed(context, '/contact_info');
-              break;
-            case 2:
-              Navigator.pushNamed(context, '/profile');
-              break;
-          }
-        },
+        onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(
               icon: Icon(Icons.picture_as_pdf), label: 'Flyer'),
@@ -120,155 +181,6 @@ class _ShowingImagePageState extends State<ShowingImagePage> {
         selectedItemColor: Colors.green[800],
         unselectedItemColor: Colors.grey,
       ),
-    );
-  }
-}
-
-class PDFViewerWidget extends StatefulWidget {
-  final File pdfFile;
-
-  const PDFViewerWidget({required this.pdfFile});
-
-  @override
-  _PDFViewerWidgetState createState() => _PDFViewerWidgetState();
-}
-
-class _PDFViewerWidgetState extends State<PDFViewerWidget> {
-  int totalPages = 0;
-  int currentPage = 0;
-  bool isReady = false;
-  double scale = 1.0;
-  late PDFViewController pdfController;
-
-  // Variable to track drag distance
-  double dragDistance = 0.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      elevation: 3,
-      child: Column(
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.65,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: GestureDetector(
-                onScaleUpdate: (details) {
-                  setState(() {
-                    scale =
-                        details.scale.clamp(1.0, 3.0); // Pinch-to-zoom support
-                  });
-                },
-                onTap: () {
-                  // Toggle zoom on tap
-                  setState(() {
-                    scale = (scale == 1.0) ? 2.0 : 1.0;
-                  });
-                },
-                onHorizontalDragUpdate: (details) {
-                  // Track drag distance
-                  dragDistance += details.primaryDelta!;
-
-                  // Threshold to change page
-                  if (dragDistance.abs() > 50) {
-                    // If drag exceeds 50 pixels
-                    if (dragDistance > 0 && currentPage > 0) {
-                      pdfController.setPage(
-                          currentPage - 1); // Swipe right (go to previous page)
-                    } else if (dragDistance < 0 &&
-                        currentPage < totalPages - 1) {
-                      pdfController.setPage(
-                          currentPage + 1); // Swipe left (go to next page)
-                    }
-
-                    // Reset drag distance after page change
-                    dragDistance = 0;
-                  }
-                },
-                child: Transform.scale(
-                  scale: scale,
-                  child: PDFView(
-                    filePath: widget.pdfFile.path,
-                    enableSwipe: true,
-                    swipeHorizontal:
-                        true, // Horizontal swipe enabled for smooth navigation
-                    autoSpacing: true,
-                    pageFling: true,
-                    fitPolicy: FitPolicy.BOTH,
-                    onRender: (pages) {
-                      setState(() {
-                        totalPages = pages ?? 0;
-                        isReady = true;
-                      });
-                    },
-                    onPageChanged: (page, _) {
-                      setState(() {
-                        currentPage = page ?? 0;
-                      });
-                    },
-                    onViewCreated: (controller) {
-                      pdfController = controller;
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-          if (isReady)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: Column(
-                children: [
-                  Text(
-                    "Page ${currentPage + 1} of $totalPages",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildControlButton(Icons.chevron_left, "Prev", () {
-                        if (currentPage > 0) {
-                          pdfController.setPage(currentPage - 1);
-                        }
-                      }),
-                      _buildControlButton(Icons.zoom_in, "Zoom In", () {
-                        setState(() {
-                          scale =
-                              (scale + 0.2).clamp(1.0, 3.0); // Increase zoom
-                        });
-                      }),
-                      _buildControlButton(Icons.zoom_out, "Zoom Out", () {
-                        setState(() {
-                          scale =
-                              (scale - 0.2).clamp(1.0, 3.0); // Decrease zoom
-                        });
-                      }),
-                      _buildControlButton(Icons.chevron_right, "Next", () {
-                        if (currentPage < totalPages - 1) {
-                          pdfController.setPage(currentPage + 1);
-                        }
-                      }),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildControlButton(
-      IconData icon, String label, VoidCallback onPressed) {
-    return IconButton(
-      icon: Icon(icon),
-      onPressed: onPressed,
-      tooltip: label,
     );
   }
 }
