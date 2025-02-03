@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Navigate to signup page
-import 'showing_image.dart'; // Import ShowingImagePage correctly
-import 'signup_page.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Authentication
+import 'package:google_sign_in/google_sign_in.dart'; // Import Google Sign-In
+import 'package:sign_in_with_apple/sign_in_with_apple.dart'; // Import Apple Sign-In
+import 'showing_image.dart'; // Navigate to ShowingImagePage
+import 'signup_page.dart'; // Navigate to SignupPage
 
 class LoginPage extends StatefulWidget {
   @override
@@ -13,6 +15,9 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isPasswordVisible = false; // To toggle the visibility of password
+
+  // Google Sign-In instance
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   Future<void> _login() async {
     if (_emailController.text.trim().isEmpty ||
@@ -79,6 +84,89 @@ class _LoginPageState extends State<LoginPage> {
       // Handle any unexpected errors
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An unexpected error occurred: $e')),
+      );
+    }
+  }
+
+  // Google Sign-In functionality
+  Future<void> _googleSignin() async {
+    try {
+      GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+      if (googleAuth?.accessToken != null && googleAuth?.idToken != null) {
+        final OAuthCredential credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth?.accessToken,
+          idToken: googleAuth?.idToken,
+        );
+
+        UserCredential userCredential =
+            await _auth.signInWithCredential(credential);
+
+        if (userCredential.user != null &&
+            !userCredential.user!.emailVerified) {
+          await userCredential.user?.sendEmailVerification();
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Google Sign-In successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => ShowingImagePage()),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Google Sign-In failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  // Apple Sign-In functionality
+  Future<void> _appleSignin() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+
+      final oauthCredential = OAuthProvider("apple.com").credential(
+        idToken: credential.identityToken,
+        accessToken: credential.authorizationCode,
+      );
+
+      UserCredential userCredential =
+          await _auth.signInWithCredential(oauthCredential);
+
+      if (userCredential.user != null && !userCredential.user!.emailVerified) {
+        await userCredential.user?.sendEmailVerification();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Apple Sign-In successful!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => ShowingImagePage()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Apple Sign-In failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -208,6 +296,70 @@ class _LoginPageState extends State<LoginPage> {
                   style:
                       TextStyle(color: Colors.green[800]), // Green text color
                 ),
+              ),
+              SizedBox(height: 20),
+              // Add Row to place buttons side by side
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Google Sign-In Button
+                  ElevatedButton.icon(
+                    onPressed: _googleSignin,
+                    icon: Image.asset(
+                      'assets/google_logo.png', // Add Google logo image
+                      height: 24, // Set appropriate height
+                      width: 24, // Set appropriate width
+                    ),
+                    label: Text(
+                      'Google',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        side: BorderSide(
+                            color: Colors.grey.withOpacity(0.5), width: 1),
+                      ),
+                      elevation: 5,
+                    ),
+                  ),
+                  SizedBox(width: 10), // Space between the buttons
+                  // Apple Sign-In Button
+                  ElevatedButton.icon(
+                    onPressed: _appleSignin,
+                    icon: Icon(
+                      Icons.apple,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                    label: Text(
+                      'Apple',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        side: BorderSide(
+                            color: Colors.grey.withOpacity(0.5), width: 1),
+                      ),
+                      elevation: 5,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

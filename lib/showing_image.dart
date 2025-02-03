@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart'; // Add flutter_pdfview package
+import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'login_page.dart'; // Import the login page
+import 'login_page.dart';
 import 'contact_info.dart';
 import 'profile.dart';
 
@@ -66,12 +66,21 @@ class _ShowingImagePageState extends State<ShowingImagePage> {
   Future<String> downloadPdf(String url) async {
     final response = await http.get(Uri.parse(url));
     final bytes = response.bodyBytes;
+
+    // Get the cache directory for better performance
     final tempDir = await getTemporaryDirectory();
     final filePath =
         '${tempDir.path}/pdf_${DateTime.now().millisecondsSinceEpoch}.pdf';
+
     final file = File(filePath);
-    await file.writeAsBytes(bytes);
-    return filePath;
+
+    // Check if the PDF is already downloaded in the cache
+    if (await file.exists()) {
+      return filePath; // Return the cached file path if it already exists
+    } else {
+      await file.writeAsBytes(bytes); // Save the file to cache
+      return filePath;
+    }
   }
 
   void _showLogoutDialog() {
@@ -121,6 +130,7 @@ class _ShowingImagePageState extends State<ShowingImagePage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        automaticallyImplyLeading: false, // This removes the back arrow
         elevation: 1,
         titleSpacing: 10,
         title: Row(
