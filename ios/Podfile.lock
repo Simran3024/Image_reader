@@ -1286,9 +1286,6 @@ PODS:
     - Flutter
     - flutter_inappwebview_ios/Core (= 0.0.1)
     - OrderedSet (~> 6.0.3)
-  - flutter_inappwebview_ios/Core (0.0.1):
-    - Flutter
-    - OrderedSet (~> 6.0.3)
   - flutter_local_notifications (0.0.1):
     - Flutter
   - flutter_pdfview (1.0.2):
@@ -1432,8 +1429,6 @@ PODS:
   - nanopb (3.30910.0):
     - nanopb/decode (= 3.30910.0)
     - nanopb/encode (= 3.30910.0)
-  - nanopb/decode (3.30910.0)
-  - nanopb/encode (3.30910.0)
   - open_file_ios (0.0.1):
     - Flutter
   - OrderedSet (6.0.3)
@@ -1614,6 +1609,6 @@ SPEC CHECKSUMS:
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
   webview_flutter_wkwebview: 1821ceac936eba6f7984d89a9f3bcb4dea99ebb2
 
-PODFILE CHECKSUM: 1c07eec657febc791132bec9fbdae4daba924b19
+PODFILE CHECKSUM: e8bcd08b20e3a4df592581cb26ad6a5b4b02149e
 
 COCOAPODS: 1.16.2

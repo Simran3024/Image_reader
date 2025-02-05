@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'login_page.dart';
-import 'contact_info.dart';
-import 'profile.dart';
 
 class ShowingImagePage extends StatefulWidget {
   @override
